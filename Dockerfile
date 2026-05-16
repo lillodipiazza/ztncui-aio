@@ -10,7 +10,7 @@ ADD VERSION .
 # BUILD ZTNCUI IN FIRST STAGE
 WORKDIR /build
 RUN apt update -y && \
-    apt install curl gnupg2 ca-certificates zip unzip build-essential git --no-install-recommends -y && \
+    apt install curl gnupg2 ca-certificates zip unzip build-essential git python3 --no-install-recommends -y && \
     curl -sL -o node_inst.sh https://deb.nodesource.com/setup_${NODEJS_MAJOR}.x && \
     bash node_inst.sh && \
     apt install -y nodejs --no-install-recommends && \
@@ -18,7 +18,7 @@ RUN apt update -y && \
     git clone https://github.com/key-networks/ztncui && \
     npm install -g node-gyp pkg && \
     cd ztncui/src && \
-    npm install && \
+    npm_config_python=/usr/bin/python3 npm install && \
     PKG_ARCH="$(if [ "${TARGETARCH}" = "amd64" ]; then echo "x64"; else echo "${TARGETARCH}"; fi)" && \
     pkg -c ./package.json -t "node${NODEJS_MAJOR}-linux-${PKG_ARCH}" bin/www -o ztncui && \
     zip -r /build/artifact.zip ztncui node_modules/argon2/build/Release
