@@ -22,7 +22,8 @@ RUN apt update -y && \
     zip -r /build/artifact.zip ztncui node_modules/argon2/build/Release
 
 # BUILD GO UTILS
-FROM golang:bullseye AS argong
+# Pin Go toolchain because upstream minica now requires Go >= 1.25.
+FROM golang:1.25-bullseye AS argong
 WORKDIR /buildsrc
 COPY argon2g /buildsrc/argon2g
 COPY fileserv /buildsrc/fileserv
