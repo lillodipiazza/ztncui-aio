@@ -1,5 +1,6 @@
 FROM debian:bullseye-slim AS builder
 ENV NODEJS_MAJOR=16
+ARG TARGETARCH
 
 ARG DEBIAN_FRONTEND=noninteractive
 LABEL MAINTAINER="Key Networks https://key-networks.com"
@@ -18,12 +19,13 @@ RUN apt update -y && \
     npm install -g node-gyp pkg && \
     cd ztncui/src && \
     npm install && \
-    pkg -c ./package.json -t "node${NODEJS_MAJOR}-linux-x64" bin/www -o ztncui && \
+    PKG_ARCH="$(if [ "${TARGETARCH}" = "amd64" ]; then echo "x64"; else echo "${TARGETARCH}"; fi)" && \
+    pkg -c ./package.json -t "node${NODEJS_MAJOR}-linux-${PKG_ARCH}" bin/www -o ztncui && \
     zip -r /build/artifact.zip ztncui node_modules/argon2/build/Release
 
 # BUILD GO UTILS
 # Pin Go toolchain because upstream minica now requires Go >= 1.25.
-FROM golang:1.25-bullseye AS argong
+FROM golang:1.25 AS argong
 WORKDIR /buildsrc
 COPY argon2g /buildsrc/argon2g
 COPY fileserv /buildsrc/fileserv
